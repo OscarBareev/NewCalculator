@@ -1,12 +1,22 @@
 package com.example.newcalculator;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,11 +41,25 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout engineeringCalculator;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+
+        Bundle arguments = getIntent().getExtras();
+        if (arguments != null) {
+            String fileName = arguments.get("pathKey").toString();
+            File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+            ImageView backgroundImg = findViewById(R.id.backgroundImg);
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+            backgroundImg.setImageBitmap(bitmap);
+        }
+
 
         init();
 
@@ -46,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         changeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (simpleCalculator.getVisibility() == View.GONE){
+                if (simpleCalculator.getVisibility() == View.GONE) {
                     engineeringCalculator.setVisibility(View.GONE);
                     simpleCalculator.setVisibility(View.VISIBLE);
                 } else {
@@ -58,11 +82,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
     }
 
-    private void init(){
+    private void init() {
         resultField = findViewById(R.id.resultField);
         resultField.setText("0");
 
@@ -92,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
         dotBtn.setOnClickListener(myButtonClickListener);
         resetBtn.setOnClickListener(myButtonClickListener);
     }
-
 
 
     View.OnClickListener myButtonClickListener = new View.OnClickListener() {
@@ -162,9 +183,32 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void clearResult(){
-        if (resultField.getText().toString().trim().equals("0")){
+    private void clearResult() {
+        if (resultField.getText().toString().trim().equals("0")) {
             result = "";
         }
     }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            Intent intentNotes = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intentNotes);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 }
+
