@@ -21,10 +21,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     private EditText path;
     private Button okBtn;
-
-    String fileName = "";
-
-
     private static final int REQUEST_CODE = 101;
 
     @Override
@@ -32,13 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        int permissionStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permissionStatus == PackageManager.PERMISSION_GRANTED){
-            LoadImg();
-        } else {
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-        }
+        init();
     }
 
 
@@ -49,7 +39,7 @@ public class SettingsActivity extends AppCompatActivity {
         switch (requestCode){
             case REQUEST_CODE:
                 if (grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    LoadImg();
+                    init();
                 }else {
                     Toast.makeText(getApplicationContext(), "Разрешение отсутствует", Toast.LENGTH_LONG).show();
                 }
@@ -57,36 +47,37 @@ public class SettingsActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void LoadImg(){
+    private void init(){
 
-        path = findViewById(R.id.pathText);
         okBtn = findViewById(R.id.okBtn);
+        path = findViewById(R.id.pathText);
 
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fileName = path.getText().toString().trim();
 
-                if (isExternalStorageReadable()){
-                    File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
-                    if (imageFile.exists() && imageFile.isFile()){
+                int permissionStatus = ContextCompat.checkSelfPermission(SettingsActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
+                if (permissionStatus == PackageManager.PERMISSION_GRANTED){
 
-                        //Toast.makeText(getApplicationContext(), "ВСЕ ОКИ", Toast.LENGTH_LONG).show();
+                    String fileName = "";
+                    fileName = path.getText().toString().trim();
 
-                        Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
-                        intent.putExtra("pathKey", fileName);
-                        startActivity(intent);
+                    if (isExternalStorageReadable()){
+                        File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+                        if (imageFile.exists() && imageFile.isFile()){
 
+                            Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
+                            intent.putExtra("pathKey", fileName);
+                            startActivity(intent);
 
-
-
-
-
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Неверное имя файла!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Неверное имя файла!", Toast.LENGTH_LONG).show();
+                        }
                     }
+
+                } else {
+                    ActivityCompat.requestPermissions(SettingsActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
                 }
             }
         });
